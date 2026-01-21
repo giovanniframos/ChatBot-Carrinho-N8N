@@ -1,0 +1,367 @@
+{
+  "name": "Carrinho - WPP",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "abadada5-923a-4c7d-9be2-0adfae7ea67d",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "5dc54094-c762-4d8f-b848-181944c96da5",
+      "name": "Webhook",
+      "webhookId": "abadada5-923a-4c7d-9be2-0adfae7ea67d"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "5098e083-7a96-496f-9648-0eccfbf96b9e",
+              "name": "LeadName",
+              "value": "={{ $json.body.data.buyer.name }}",
+              "type": "string"
+            },
+            {
+              "id": "f70fb8e9-521a-40d3-9c03-314d89f30fb1",
+              "name": "Phone",
+              "value": "={{ $json.body.data.buyer.phone }}",
+              "type": "string"
+            },
+            {
+              "id": "791103fb-a120-4c02-9191-fa31e90a59a6",
+              "name": "produtoURL",
+              "value": "https://pay.hotmart.com/O102059941V?bid=1759967035641",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        432,
+        -16
+      ],
+      "id": "81f2644b-135f-4438-b387-ca7520e4e01f",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "f6519fd7-6df6-4454-97aa-3240067d43dc",
+              "leftValue": "={{ $json.headers[\"x-hotmart-hottok\"] }}",
+              "rightValue": "=7E1xBkMXla2UvJLPrq4f6TOmDmJQtT67042698",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        208,
+        0
+      ],
+      "id": "31206288-68f8-4742-b624-fdf63811b222",
+      "name": "If"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        432,
+        224
+      ],
+      "id": "82f6ca7f-d68f-4634-ae6c-53a828324bb3",
+      "name": "No Operation, do nothing"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('If').item.json.body.event }}",
+                    "rightValue": "PURCHASE_OUT_OF_SHOPPING_CART",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "4b0f44a7-fdcd-411a-bdbe-f76018bbdd05"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Abandono de carrinho"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "4a24c604-614f-4078-955e-a6e18d29d7cf",
+                    "leftValue": "={{ $('If').item.json.body.event }}",
+                    "rightValue": "PURCHASE_EXPIRED",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Compra Expirada"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.3,
+      "position": [
+        640,
+        -16
+      ],
+      "id": "00f1cbb5-4ef2-4eb2-bf03-a62ca8cd83cf",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "messages": {
+          "messageValues": [
+            {
+              "type": "ai",
+              "message": "={{ $json.messageId }}"
+            }
+          ]
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryManager",
+      "typeVersion": 1.1,
+      "position": [
+        1328,
+        -176
+      ],
+      "id": "2666ad20-5c4a-4d08-b6e4-263303642558",
+      "name": "Chat Memory Manager"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.z-api.io/instances/3E6BF063119380EBD8073E93C353D08B/token/5C844B34E741E8F1E8AC90BE/send-text",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "client-token",
+              "value": "F1467e91aca0c4474aaeeeb275331d38dS"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"phone\": \"={{ $json.Phone }}\",\n  \"message\": \"={{ $json.Mensagem }}\"\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1088,
+        -176
+      ],
+      "id": "5d863ea2-05d4-49af-9538-f47ca1fd758c",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={\n  \"LeadName\": \"={{ $json.LeadName }}\",\n  \"Phone\": \"={{ $json.Phone }}\",\n  \"Mensagem\": \"Ei! Percebemos que você deixou alguns produtos no carrinho.\\nEles ainda estão te esperando!\\n\\nFinalize sua compra agora antes que acabe o estoque.\\n\\n👉 https://pay.hotmart.com/O102059941V?bid=1759967035641\\n\\nSe tiver qualquer dúvida, é só me chamar — posso te ajudar a concluir rapidinho.\",\n  \"ProdutoURL\": \"https://pay.hotmart.com/O102059941V?bid=1759967035641\"\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        848,
+        -112
+      ],
+      "id": "10ef0698-99c4-4535-a884-090e2eedf85b",
+      "name": "Edit Fields1"
+    }
+  ],
+  "pinData": {
+    "Webhook": [
+      {
+        "json": {
+          "headers": {
+            "host": "raze-n8n.oosvrc.easypanel.host",
+            "user-agent": "Jodd HTTP",
+            "content-length": "413",
+            "content-type": "application/json",
+            "x-forwarded-for": "3.87.43.70",
+            "x-forwarded-host": "raze-n8n.oosvrc.easypanel.host",
+            "x-forwarded-port": "443",
+            "x-forwarded-proto": "https",
+            "x-forwarded-server": "6a0ed918e4fd",
+            "x-hotmart-hottok": "7E1xBkMXla2UvJLPrq4f6TOmDmJQtT67042698",
+            "x-real-ip": "3.87.43.70",
+            "accept-encoding": "gzip"
+          },
+          "params": {},
+          "query": {},
+          "body": {
+            "data": {
+              "offer": {
+                "code": "n82b9jqz"
+              },
+              "product": {
+                "name": "Produto test postback2 com ç e á",
+                "id": 123456
+              },
+              "checkout_country": {
+                "iso": "BR",
+                "name": "Brasil"
+              },
+              "buyer_ip": "127.0.0.1",
+              "affiliate": false,
+              "buyer": {
+                "phone": "999999999",
+                "name": "Postback2 teste",
+                "email": "teste@hotmart.com.br"
+              }
+            },
+            "id": "d78acfdd-3709-46ff-b28d-b59a39553684",
+            "creation_date": 1761052213209,
+            "event": "PURCHASE_OUT_OF_SHOPPING_CART",
+            "version": "2.0.0"
+          },
+          "webhookUrl": "https://raze-n8n.oosvrc.easypanel.host/webhook-test/abadada5-923a-4c7d-9be2-0adfae7ea67d",
+          "executionMode": "test"
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Chat Memory Manager",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "c4fbfb4b-4692-458e-b47a-a6b3557ade8f",
+  "meta": {
+    "instanceId": "cedb93443359c2d61f0ad1463fef4d0439f0b6746b02233800169516e8ec73b3"
+  },
+  "id": "6ogv3A1NsuhzXuxp",
+  "tags": []
+}
